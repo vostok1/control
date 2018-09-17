@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import time
+import PID
 import serial
 import matplotlib.pyplot as plt
 from drawnow import *
@@ -17,7 +18,12 @@ ser = serial.Serial(
 )
 
 plt.ion()
-cnt=0	
+cnt=0.0	
+count = 1
+pid = PID.PID(0.8, 0.1, 0.0002)
+pid.SetPoint=25.0
+pid.setSampleTime(0.1)
+output = 0.0
 for i in range(0,2):
 	values.append(0.0)
 def plotValues():
@@ -26,17 +32,24 @@ def plotValues():
     plt.ylabel('Values')
     plt.plot(values, 'rx-', label='values')
     plt.legend(loc='upper right')
-    plt.ylim(0, 120) 
+    plt.ylim(0, 80) 
 
+	
 while 1:
 	x=ser.readline()
 	
 	cnt = float(x)
-	
-	print x
+	pid.update(cnt)
+	output = pid.output
+	  
+	cnt +=  (output)
+	print x + " : " + str(cnt)
 	values.append(cnt)
 	values.pop(0)
-	drawnow(plotValues)
+	count += 1
+	#drawnow(plotValues)
+
+
 	
 	        
 	
